@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Monitor de prima de riesgo de la zona euro</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  :root {
+    --fondo: #172231;
+    --panel: #1d2b3d;
+    --linea: #2c3d53;
+    --texto: #e9edf2;
+    --suave: #97a5b7;
+    --bajo: #4fa37f;
+    --moderado: #d8a93b;
+    --alto: #d9713c;
+    --crisis: #c8453f;
+    --bund: #7fa6d9;
+    box-sizing: border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  @media (prefers-color-scheme: light) {
+    :root:not([data-theme="dark"]) {
+      --fondo: #f3f5f8; --panel: #ffffff; --linea: #d9dfe7;
+      --texto: #172231; --suave: #5b6878;
+    }
+  }
+  :root[data-theme="light"] {
+    --fondo: #f3f5f8; --panel: #ffffff; --linea: #d9dfe7;
+    --texto: #172231; --suave: #5b6878;
+  }
+  *, *::before, *::after { box-sizing: inherit; }
+  body {
+    margin: 0; background: var(--fondo); color: var(--texto);
+    font-family: "Public Sans", "Helvetica Neue", Arial, sans-serif;
+    font-size: 15px; line-height: 1.5;
+    font-variant-numeric: tabular-nums;
+  }
+  .widget { max-width: 880px; margin: 0 auto; padding: 28px 20px 32px; }
+  h1 { font-size: 1.05rem; font-weight: 600; margin: 0 0 14px; color: var(--suave); }
+  .lectura {
+    font-size: clamp(1.25rem, 3.2vw, 1.7rem); font-weight: 600; line-height: 1.3;
+    margin: 0 0 28px; max-width: 34em;
+  }
+  .lectura small { display: block; font-size: 0.95rem; font-weight: 400; color: var(--suave); margin-top: 10px; line-height: 1.5; }
+
+  /* Regla de riesgo: una fila por país */
+  .regla { background: var(--panel); border: 1px solid var(--linea); border-radius: 10px; padding: 18px 20px 10px; }
+  .escala, .fila { display: grid; grid-template-columns: 7.5rem 5.5rem 1fr; gap: 14px; align-items: center; }
+  .escala { font-size: 0.75rem; color: var(--suave); margin-bottom: 6px; }
+  .escala .marcas { position: relative; height: 1.1em; }
+  .escala .marcas span { position: absolute; transform: translateX(-50%); }
+  .fila { padding: 10px 0; border-top: 1px solid var(--linea); }
+  .fila:first-of-type { border-top: 0; }
+  .pais { font-weight: 600; }
+  .pais .nivel { display: block; font-size: 0.78rem; font-weight: 500; }
+  .valor { font-size: 1.35rem; font-weight: 700; text-align: right; }
+  .valor .unidad { font-size: 0.75rem; font-weight: 400; color: var(--suave); margin-left: 2px; }
+  .pista { position: relative; height: 30px; }
+  .zonas { position: absolute; inset: 11px 0; border-radius: 4px; overflow: hidden; display: flex; opacity: 0.28; }
+  .zonas i { height: 100%; }
+  .rango { position: absolute; top: 9px; height: 12px; border: 1.5px solid var(--suave); border-radius: 6px; opacity: 0.8; }
+  .rango.cortado { border-right-style: dashed; border-top-right-radius: 0; border-bottom-right-radius: 0; }
+  .punto { position: absolute; top: 5px; width: 20px; height: 20px; margin-left: -10px; border-radius: 50%; border: 3px solid var(--panel); }
+  .detalle { grid-column: 3; font-size: 0.8rem; color: var(--suave); margin-top: -2px; }
+  .detalle b { color: var(--texto); font-weight: 600; }
+  .aviso { color: var(--alto); font-weight: 600; }
+  .leyenda { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 0.78rem; color: var(--suave); margin: 12px 0 4px; }
+  .leyenda span::before { content: ""; display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; background: var(--c); vertical-align: -1px; }
+
+  /* Gráfico histórico */
+  .historico { margin-top: 28px; }
+  .cabecera { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 10px; margin-bottom: 10px; }
+  .cabecera h2 { font-size: 1rem; font-weight: 600; margin: 0; }
+  .periodos { display: flex; gap: 4px; }
+  .periodos button {
+    font: inherit; font-size: 0.8rem; color: var(--suave); background: transparent;
+    border: 1px solid var(--linea); border-radius: 6px; padding: 4px 10px; cursor: pointer;
+  }
+  .periodos button[aria-pressed="true"] { color: var(--texto); border-color: var(--suave); }
+  .periodos button:focus-visible { outline: 2px solid var(--bund); outline-offset: 2px; }
+  .lienzo { position: relative; height: 300px; background: var(--panel); border: 1px solid var(--linea); border-radius: 10px; padding: 12px; }
+
+  footer { margin-top: 18px; font-size: 0.78rem; color: var(--suave); }
+  footer a { color: inherit; }
+  .error { background: var(--panel); border: 1px solid var(--crisis); border-radius: 10px; padding: 16px 20px; }
+
+  @media (max-width: 560px) {
+    .escala, .fila { grid-template-columns: 5.5rem 4.5rem 1fr; gap: 10px; }
+    .detalle { grid-column: 1 / -1; }
+  }
+</style>
+</head>
+<body>
+<main class="widget" id="widget" aria-live="polite">
+  <p>Cargando datos del BCE…</p>
+</main>
+
+<script>
+// El widget lee los datos de un endpoint JSON. Por defecto usa data.json
+// (generado por src/prima_riesgo.py); con ?api=URL puede leer de otra API.
+const ENDPOINT = new URLSearchParams(location.search).get("api") || "data.json";
+const ESCALA_MAX = 400;            // pb que ocupa el ancho completo de la regla
+const COLORES = { bajo: "var(--bajo)", moderado: "var(--moderado)", alto: "var(--alto)", crisis: "var(--crisis)" };
+const COLOR_PAIS = { IT: "#4fa37f", FR: "#7fa6d9", ES: "#d8a93b", PT: "#b58ad9", GR: "#d9713c" };
+
+const pos = v => Math.max(0, Math.min(100, v / ESCALA_MAX * 100));
+const signo = v => v == null ? "–" : (v > 0 ? "+" : "") + Math.round(v);
+const mesTexto = ym => {
+  const [a, m] = ym.split("-");
+  return ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"][+m - 1] + " " + a;
+};
+
+function pintar(d) {
+  const zonas = d.umbrales.map((u, i) => {
+    const desde = i ? d.umbrales[i - 1].hasta : 0;
+    const hasta = u.hasta ?? ESCALA_MAX;
+    return `<i style="width:${pos(hasta) - pos(desde)}%;background:${COLORES[u.nivel]}"></i>`;
+  }).join("");
+
+  const filas = d.resumen.map(r => {
+    const cortado = r.maximo > ESCALA_MAX;
+    const avisos = [];
+    if (r.en_maximos) avisos.push(`<span class="aviso">Por encima del ${r.percentil} % de su historia</span>`);
+    if (r.alerta) avisos.push(`<span class="aviso">Subida de ${Math.round(r.cambio_3m)} pb en 3 meses</span>`);
+    return `
+      <div class="fila">
+        <div class="pais">${r.nombre}<span class="nivel" style="color:${COLORES[r.nivel]}">${r.etiqueta}</span></div>
+        <div class="valor">${Math.round(r.spread)}<span class="unidad">pb</span></div>
+        <div class="pista" role="img" aria-label="${r.nombre}: ${Math.round(r.spread)} pb. Rango desde 2007 entre ${Math.round(r.minimo)} y ${Math.round(r.maximo)} pb.">
+          <div class="zonas">${zonas}</div>
+          <div class="rango${cortado ? " cortado" : ""}" style="left:${pos(r.minimo)}%;width:${pos(r.maximo) - pos(r.minimo)}%"></div>
+          <div class="punto" style="left:${pos(r.spread)}%;background:${COLORES[r.nivel]}"></div>
+        </div>
+        <div class="detalle">
+          12 meses: <b>${signo(r.cambio_12m)} pb</b> · máximo ${Math.round(r.maximo)} pb (${mesTexto(r.fecha_maximo)})
+          ${avisos.length ? "<br>" + avisos.join(" · ") : ""}
+        </div>
+      </div>`;
+  }).join("");
+
+  const marcas = [0, 100, 200, 300, 400].map(v => `<span style="left:${pos(v)}%">${v}${v === 400 ? "+" : ""}</span>`).join("");
+  const leyenda = d.umbrales.map(u => `<span style="--c:${COLORES[u.nivel]}">${u.etiqueta}${u.hasta ? " (< " + u.hasta + " pb)" : " (≥ 400 pb)"}</span>`).join("");
+
+  document.getElementById("widget").innerHTML = `
+    <h1>${d.titulo}</h1>
+    <p class="lectura">${d.lectura.split(". ")[0]}.
+      <small>${d.lectura.split(". ").slice(1).join(". ")}</small></p>
+
+    <section class="regla" aria-label="Prima de riesgo actual por país">
+      <div class="escala"><span></span><span></span><div class="marcas">${marcas}</div></div>
+      ${filas}
+      <div class="leyenda">${leyenda}<span style="--c:transparent;border:0">▭ rango histórico desde 2007 · ● valor actual</span></div>
+    </section>
+
+    <section class="historico">
+      <div class="cabecera">
+        <h2>Evolución del diferencial frente al Bund (pb)</h2>
+        <div class="periodos" role="group" aria-label="Periodo">
+          <button data-anios="3">3 años</button>
+          <button data-anios="10">10 años</button>
+          <button data-anios="0" aria-pressed="true">Desde 2007</button>
+        </div>
+      </div>
+      <div class="lienzo"><canvas id="grafico" aria-label="Gráfico histórico de primas de riesgo"></canvas></div>
+    </section>
+
+    <footer>
+      Dato mensual de ${mesTexto(d.ultimo_dato)}. Bund a 10 años: ${d.series.bund.at(-1).toFixed(2)} %.
+      Fragmentación de la zona euro (media de los cinco diferenciales): ${Math.round(d.fragmentacion.valor)} pb.
+      Fuente: <a href="${d.fuente.url}" target="_blank" rel="noopener">${d.fuente.nombre}</a>.
+      Actualizado el ${new Date(d.actualizado).toLocaleString("es-ES")}.
+    </footer>`;
+
+  pintarGrafico(d);
+}
+
+let grafico;
+function pintarGrafico(d) {
+  const estilo = getComputedStyle(document.documentElement);
+  const suave = estilo.getPropertyValue("--suave").trim();
+  const linea = estilo.getPropertyValue("--linea").trim();
+  const nombres = Object.fromEntries(d.resumen.map(r => [r.codigo, r.nombre]));
+
+  const conjuntos = Object.entries(d.series.spreads).map(([c, valores]) => ({
+    label: nombres[c], data: valores, borderColor: COLOR_PAIS[c], backgroundColor: COLOR_PAIS[c],
+    borderWidth: 1.8, pointRadius: 0, tension: 0.2, spanGaps: true
+  }));
+  conjuntos.push({
+    label: "Fragmentación (media)", data: d.series.fragmentacion, borderColor: suave,
+    borderDash: [5, 4], borderWidth: 1.5, pointRadius: 0
+  });
+
+  grafico = new Chart(document.getElementById("grafico"), {
+    type: "line",
+    data: { labels: d.series.fechas, datasets: conjuntos },
+    options: {
+      responsive: true, maintainAspectRatio: false, animation: false,
+      interaction: { mode: "index", intersect: false },
+      scales: {
+        x: { ticks: { color: suave, maxTicksLimit: 8, callback: (v, i) => mesTexto(d.series.fechas[i]) }, grid: { color: linea } },
+        y: { type: "logarithmic", min: 5, ticks: { color: suave, callback: v => [5, 10, 25, 50, 100, 200, 500, 1000, 2500].includes(v) ? v : "" }, grid: { color: linea } }
+      },
+      plugins: {
+        legend: { labels: { color: suave, boxWidth: 12, boxHeight: 2 } },
+        tooltip: { callbacks: { title: i => mesTexto(i[0].label), label: i => ` ${i.dataset.label}: ${i.raw == null ? "–" : Math.round(i.raw) + " pb"}` } }
+      }
+    }
+  });
+
+  document.querySelectorAll(".periodos button").forEach(b => b.addEventListener("click", () => {
+    document.querySelectorAll(".periodos button").forEach(x => x.setAttribute("aria-pressed", x === b));
+    const anios = +b.dataset.anios;
+    const inicio = anios ? Math.max(0, d.series.fechas.length - anios * 12) : 0;
+    grafico.data.labels = d.series.fechas.slice(inicio);
+    grafico.data.datasets.forEach((ds, i) => { ds.data = (i < conjuntos.length - 1 ? Object.values(d.series.spreads)[i] : d.series.fragmentacion).slice(inicio); });
+    grafico.options.scales.x.ticks.callback = (v, i) => mesTexto(grafico.data.labels[i]);
+    grafico.update();
+  }));
+}
+
+fetch(ENDPOINT, { cache: "no-store" })
+  .then(r => { if (!r.ok) throw new Error(`El endpoint respondió con el código ${r.status}`); return r.json(); })
+  .then(pintar)
+  .catch(e => {
+    document.getElementById("widget").innerHTML = `<div class="error">
+      <strong>No se han podido cargar los datos.</strong><br>
+      ${e.message}. Comprueba que ${ENDPOINT} existe. Si abres el archivo directamente desde el ordenador,
+      arráncalo con <code>python -m http.server</code> dentro de la carpeta docs.</div>`;
+  });
+</script>
+</body>
+</html>
