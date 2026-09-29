@@ -1,0 +1,35 @@
+# Actualiza automáticamente los datos del widget cada día.
+# GitHub ejecuta el script de Python, regenera docs/data.json y lo publica.
+name: Actualizar prima de riesgo
+
+on:
+  schedule:
+    - cron: "0 7 * * *"   # todos los días a las 07:00 UTC
+  workflow_dispatch:        # permite lanzarlo a mano desde la pestaña Actions
+
+permissions:
+  contents: write
+
+jobs:
+  actualizar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Instalar dependencias
+        run: pip install -r requirements.txt
+
+      - name: Descargar datos del BCE y calcular el indicador
+        run: python src/prima_riesgo.py
+
+      - name: Guardar los datos nuevos
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@users.noreply.github.com"
+          git add docs/data.json
+          git diff --staged --quiet || git commit -m "Datos actualizados $(date -u +%Y-%m-%d)"
+          git push
