@@ -1,7 +1,7 @@
 {
  "titulo": "Monitor de prima de riesgo de la zona euro",
- "actualizado": "2026-11-08T14:02+00:00",
- "ultimo_dato": "2026-09",
+ "actualizado": "2026-11-11T14:53+00:00",
+ "ultimo_dato": "2026-10",
  "unidad": "puntos básicos (pb) frente al Bund alemán a 10 años",
  "fuente": {
   "nombre": "Banco Central Europeo, ECB Data Portal (dataset IRS)",
@@ -30,56 +30,56 @@
    "etiqueta": "Crisis"
   }
  ],
- "lectura": "Francia es hoy el país con mayor prima de riesgo (97 pb frente al Bund). Aunque su nivel absoluto se considera riesgo bajo, Francia está por encima del 95 % de los meses desde 2007: su riesgo relativo está en máximos. Ningún país registra subidas bruscas en los últimos tres meses.",
+ "lectura": "Francia es hoy el país con mayor prima de riesgo (147 pb frente al Bund). Aunque su nivel absoluto se considera tensión moderada, Francia está por encima del 99 % de los meses desde 2007: su riesgo relativo está en máximos. Tensión creciente en Francia: más de 50 pb de subida en tres meses.",
  "resumen": [
   {
    "codigo": "FR",
    "nombre": "Francia",
-   "fecha": "2026-09",
-   "rendimiento": 4.44,
-   "spread": 96.7,
-   "cambio_1m": 15.2,
-   "cambio_3m": 25.1,
-   "cambio_12m": 15.0,
-   "percentil": 95,
+   "fecha": "2026-10",
+   "rendimiento": 4.89,
+   "spread": 147.4,
+   "cambio_1m": 50.7,
+   "cambio_3m": 69.4,
+   "cambio_12m": 65.1,
+   "percentil": 99,
    "maximo": 154.0,
    "fecha_maximo": "2011-11",
    "minimo": 5.0,
    "fecha_minimo": "2007-02",
-   "nivel": "bajo",
-   "etiqueta": "Riesgo bajo",
-   "alerta": false,
+   "nivel": "moderado",
+   "etiqueta": "Tensión moderada",
+   "alerta": true,
    "en_maximos": true
   },
   {
    "codigo": "IT",
    "nombre": "Italia",
-   "fecha": "2026-09",
-   "rendimiento": 4.36,
-   "spread": 88.9,
-   "cambio_1m": 8.8,
-   "cambio_3m": 11.9,
-   "cambio_12m": 2.3,
-   "percentil": 17,
+   "fecha": "2026-10",
+   "rendimiento": 4.68,
+   "spread": 126.4,
+   "cambio_1m": 37.5,
+   "cambio_3m": 45.3,
+   "cambio_12m": 43.9,
+   "percentil": 34,
    "maximo": 518.7,
    "fecha_maximo": "2011-11",
    "minimo": 21.0,
    "fecha_minimo": "2007-05",
-   "nivel": "bajo",
-   "etiqueta": "Riesgo bajo",
+   "nivel": "moderado",
+   "etiqueta": "Tensión moderada",
    "alerta": false,
    "en_maximos": false
   },
   {
    "codigo": "GR",
    "nombre": "Grecia",
-   "fecha": "2026-09",
-   "rendimiento": 4.22,
-   "spread": 74.7,
-   "cambio_1m": 6.2,
-   "cambio_3m": 7.1,
-   "cambio_12m": 5.0,
-   "percentil": 14,
+   "fecha": "2026-10",
+   "rendimiento": 4.41,
+   "spread": 99.4,
+   "cambio_1m": 24.7,
+   "cambio_3m": 27.4,
+   "cambio_12m": 31.1,
+   "percentil": 19,
    "maximo": 2739.0,
    "fecha_maximo": "2012-02",
    "minimo": 23.0,
@@ -92,13 +92,13 @@
   {
    "codigo": "ES",
    "nombre": "España",
-   "fecha": "2026-09",
-   "rendimiento": 3.93,
-   "spread": 45.4,
-   "cambio_1m": 0.4,
-   "cambio_3m": 0.5,
-   "cambio_12m": -11.5,
-   "percentil": 11,
+   "fecha": "2026-10",
+   "rendimiento": 4.07,
+   "spread": 65.0,
+   "cambio_1m": 19.6,
+   "cambio_3m": 18.6,
+   "cambio_12m": 12.0,
+   "percentil": 18,
    "maximo": 555.4,
    "fecha_maximo": "2012-07",
    "minimo": 5.3,
@@ -111,13 +111,13 @@
   {
    "codigo": "PT",
    "nombre": "Portugal",
-   "fecha": "2026-09",
-   "rendimiento": 3.85,
-   "spread": 37.3,
-   "cambio_1m": 2.1,
-   "cambio_3m": 0.9,
-   "cambio_12m": -6.7,
-   "percentil": 8,
+   "fecha": "2026-10",
+   "rendimiento": 3.92,
+   "spread": 50.1,
+   "cambio_1m": 12.8,
+   "cambio_3m": 12.8,
+   "cambio_12m": 9.7,
+   "percentil": 15,
    "maximo": 1202.9,
    "fecha_maximo": "2012-01",
    "minimo": 13.9,
@@ -129,8 +129,8 @@
   }
  ],
  "fragmentacion": {
-  "valor": 68.6,
-  "cambio_12m": 0.8,
+  "valor": 97.7,
+  "cambio_12m": 32.4,
   "nivel": "bajo",
   "etiqueta": "Riesgo bajo"
  },
@@ -372,7 +372,8 @@
    "2026-06",
    "2026-07",
    "2026-08",
-   "2026-09"
+   "2026-09",
+   "2026-10"
   ],
   "bund": [
    4.02,
@@ -611,7 +612,8 @@
    2.96,
    3.07,
    3.19,
-   3.47
+   3.47,
+   3.42
   ],
   "spreads": {
    "IT": [
@@ -851,7 +853,8 @@
     77.0,
     81.1,
     80.1,
-    88.9
+    88.9,
+    126.4
    ],
    "FR": [
     5.0,
@@ -1090,7 +1093,8 @@
     71.6,
     78.0,
     81.5,
-    96.7
+    96.7,
+    147.4
    ],
    "ES": [
     5.3,
@@ -1329,7 +1333,8 @@
     44.9,
     46.4,
     45.0,
-    45.4
+    45.4,
+    65.0
    ],
    "PT": [
     15.9,
@@ -1568,7 +1573,8 @@
     36.4,
     37.3,
     35.2,
-    37.3
+    37.3,
+    50.1
    ],
    "GR": [
     26.0,
@@ -1807,7 +1813,8 @@
     67.6,
     72.0,
     68.5,
-    74.7
+    74.7,
+    99.4
    ]
   },
   "fragmentacion": [
@@ -2047,7 +2054,8 @@
    59.5,
    63.0,
    62.1,
-   68.6
+   68.6,
+   97.7
   ]
  }
 }
